@@ -47,7 +47,7 @@ isPalindrome ls = ls == (myReverse ls)
 -- 7) Flatten a nested list structure :: We have to define a new data type as
 --    lists in Haskell are homogenous
 
-data NestedList a = Elem a |List [NestedList a] 
+data NestedList a = Elem a |List [NestedList a] deriving (Show)
 
 flatten :: NestedList a -> [a]
 flatten (Elem x) = [x]
@@ -80,7 +80,30 @@ pack [] = []
 pack ls = [headPack ls] ++ pack (tailPack ls) 
 
 -- 10) Run-length encoding of a list
+
 encode :: Eq t => [t] -> [(Int,t)]
 encode ls = zip pkdLen compList
   where pkdLen = map length . pack $ ls
         compList = compress ls
+
+-- 11) Modified run-length encoding to give no length for non repetetive
+-- elements
+
+data Pair a = Single a | Multiple Int a deriving (Show)
+
+encodeModified :: Eq t => [t] -> [Pair t]
+encodeModified ls = zipWith (\l e -> if l == 1 then Single e else Multiple l e) pkdLen compList
+  where pkdLen = map length . pack $ ls
+        compList = compress ls
+
+-- 12) decode the result generated in Problem 11
+
+decodePair :: Pair t -> [t]
+decodePair (Single x) = [x]
+decodePair (Multiple n x) = replicate n x
+
+decodeModified :: [Pair t] -> [t]
+decodeModified = foldr (\e acc -> decodePair e ++ acc) [] 
+
+-- 13)
+

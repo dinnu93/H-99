@@ -105,5 +105,44 @@ decodePair (Multiple n x) = replicate n x
 decodeModified :: [Pair t] -> [t]
 decodeModified = foldr (\e acc -> decodePair e ++ acc) [] 
 
--- 13)
+-- 13) Run-length encoding of a list (direct solution)
 
+encodeDirect :: Eq t => [t] -> [Pair t]
+encodeDirect = encodeModified
+
+-- 14) Duplicate the elements of a list.
+
+dupli :: [t] -> [t]
+dupli = foldr (\e acc -> [e, e] ++ acc) [] 
+
+-- 15) Replicate the elements of a list a given number of times.
+
+repli :: [t] -> Int -> [t]
+repli ls n = foldr (\e acc -> replicate n e ++ acc) [] ls
+
+-- 16) Drop every N'th element from a list.
+
+dropEvery :: [t] -> Int -> [t]
+dropEvery ls n = foldr (\(i,e) acc -> if i`mod`n == 0 then acc else e:acc) [] indexedList
+  where indexedList = zip [1..(length ls)] ls 
+
+-- 17) Split a list into two parts; the length of the first part is given.
+
+split :: [t] -> Int -> ([t],[t])
+split ls n = (take n ls, drop n ls)
+
+-- 18) Extract a slice from a list.
+
+slice :: [t] -> Int -> Int -> [t]
+slice ls x y = drop (x-1) . take y $ ls 
+
+-- 19) Rotate a list N places to the left.
+
+rotate :: [t] -> Int -> [t]
+rotate ls n = drop modN ls ++ take modN ls
+  where modN = n `mod` (length ls)
+
+-- 20) Remove the K'th element from a list.
+
+removeAt :: Int -> [t] -> (t,[t])
+removeAt n ls = (ls !! (n-1), take (n-1) ls ++ drop n ls) 

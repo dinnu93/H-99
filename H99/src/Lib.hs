@@ -163,5 +163,13 @@ range x y
  
 -- Leaving the Random problems for future :P
 
+-- 26) Generate the combinations of K distinct objects chosen from the N elements of a list
 
+combinations :: Int -> [t] -> [[t]]
+combinations n ls
+  | n == l = [ls]
+  | n == 1 = map (\x -> [x]) ls
+  | n < l = foldr (++) [] $ map (\xs -> map ((head xs):) $ combinations (n-1) (tail xs)) $ map (`drop` ls) [0..(l-n)]
+  | otherwise = error "Invalid"
+  where l = length ls
         

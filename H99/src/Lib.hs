@@ -3,11 +3,12 @@ module Lib
     ) where
 
 import qualified Data.List as L
+import qualified System.Random as R
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
--- Questions : 1 to 10 on Lists
+-- Questions : 1 to 30 on Lists
 
 -- 1) Find the Last element of a List
 myLast :: [t] -> t
@@ -146,3 +147,21 @@ rotate ls n = drop modN ls ++ take modN ls
 
 removeAt :: Int -> [t] -> (t,[t])
 removeAt n ls = (ls !! (n-1), take (n-1) ls ++ drop n ls) 
+
+-- 21) Insert an element at a given position into a list.
+
+insertAt :: t -> [t] -> Int -> [t]
+insertAt e ls n = f ++ (e : s)
+  where splitLs@(f,s) = split ls (n-1)   
+
+-- 22) Create a list containing all integers within a given range.
+
+range :: Int -> Int -> [Int]
+range x y
+  | x == y = [x]
+  | otherwise = x : range ((if x<y then succ else pred) x) y
+ 
+-- Leaving the Random problems for future :P
+
+
+        

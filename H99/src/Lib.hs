@@ -156,7 +156,7 @@ insertAt e ls n = f ++ (e : s)
 
 -- 22) Create a list containing all integers within a given range.
 
-range :: Int -> Int -> [Int]
+range :: Integer -> Integer -> [Integer]
 range x y
   | x == y = [x]
   | otherwise = x : range ((if x<y then succ else pred) x) y
@@ -193,3 +193,85 @@ lfsort ls = map (\(f,e) -> e) . L.sort $ freqLs
    where lenLs = map length ls
          freqLookup = map (\(f,s) -> (s,f)) . encode . L.sort $ lenLs
          freqLs = map (\e -> (lookup (length e) freqLookup,e)) $ ls
+
+-- No questions numbered 29 & 30
+
+-- Questions : 31 to 41 on Arthimetic
+
+-- 31) Determine whether a given integer number is prime.
+
+isPrime :: Integer -> Bool
+isPrime 1 = False
+isPrime 2 = True
+isPrime n
+  | n > 0 = not $ any (==0) $ map (mod n) [2..(ceiling . sqrt . fromInteger $ n)] 
+  | otherwise = error "Negative integers can't be primes!"
+
+-- 32) Determine the greatest common divisor of two positive integer numbers.
+
+myGcd :: Integer -> Integer -> Integer
+myGcd 0 n = n
+myGcd n 0 = n
+myGcd x y = myGcd (mod high low) low
+  where absX = abs x
+        absY = abs y
+        high = max absX absY
+        low = min absX absY
+
+-- 33) Determine whether two positive integer numbers are coprime. Two numbers
+-- are coprime if their greatest common divisor equals 1.
+
+coprime :: Integer -> Integer -> Bool
+coprime x y = gcd x y == 1
+
+-- 34) Calculate Euler's totient function phi(m).
+
+totient :: Integer -> Integer
+totient x = toInteger . length . filter (coprime x) $ [1..(x-1)]
+
+-- 35) Determine the prime factors of a given positive integer.
+
+-- highest power of x that divides n
+multiplicity :: Integer -> Integer -> Integer
+multiplicity n p
+  | mod n p == 0 = 1 + multiplicity quot p 
+  | otherwise = 0
+  where quot = div n p
+
+primeFactors :: Integer -> [Integer]
+primeFactors n = foldr (\p acc -> replicate (fromInteger (multiplicity n p)) p ++ acc) [] primeFactorsOfN 
+  where primesBelowHalfN = filter isPrime $[1..(div n 2)]
+        primeFactorsOfN = filter (\p -> mod n p == 0) primesBelowHalfN
+
+-- 36) Determine the prime factors of a given positive integer. Construct a
+-- list containing the prime factors and their multiplicity.
+
+primeFactorsMult :: Integer -> [(Integer,Integer)]
+primeFactorsMult n = map (\(f,s) -> (s,toInteger f)) . encode . primeFactors $ n
+
+-- 37) Calculate Euler's totient function phi(m) (improved).
+
+totientImp :: Integer -> Integer
+totientImp n = foldr (\(p,m) acc -> (p-1) * p^(m-1) * acc) 1 primeFactMult
+  where primeFactMult = primeFactorsMult n
+
+-- 39) Given a range of integers by its lower and upper limit, construct a list
+-- of all prime numbers in that range.
+
+primesR :: Integer -> Integer -> [Integer]
+primesR x y = filter isPrime [x..y]
+  
+-- 40) Goldbach's conjecture. Split any even number into two primes.
+
+goldbach :: Integer -> (Integer,Integer)
+goldbach n
+  | even n && n > 2 = head . filter (\(f,s) -> f + s == n) $ [(x,y) | x <- primesBelowN, y <- primesBelowN] 
+  | otherwise = error "Give even number greater than 2!"
+  where primesBelowN = primesR 2 n
+        
+
+-- 41) Given a range of integers by its lower and upper limit, print a list of
+-- all even numbers and their Goldbach composition.
+
+goldbachList :: Integer -> Integer -> [(Integer, Integer)]
+goldbachList x y = map goldbach . filter (\n -> even n && n > 2) $ [x..y]

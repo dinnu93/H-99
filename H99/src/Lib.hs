@@ -161,7 +161,7 @@ range x y
   | x == y = [x]
   | otherwise = x : range ((if x<y then succ else pred) x) y
  
--- Leaving the Random problems for future :P
+-- 23) 24) 25) Leaving the Random problems for future :P
 
 -- 26) Generate the combinations of K distinct objects chosen from the N elements of a list
 
@@ -172,4 +172,24 @@ combinations n ls
   | n < l = foldr (++) [] $ map (\xs -> map ((head xs):) $ combinations (n-1) (tail xs)) $ map (`drop` ls) [0..(l-n)]
   | otherwise = error "Invalid"
   where l = length ls
+
+-- 27) Group problem looks tougher so I'll come back to it later.
         
+-- 28) Sorting a list of lists according to length of sublists.
+
+-- a) The objective is to sort the elements of this list according to their length.
+
+lsort :: Ord t => [[t]] -> [[t]]
+lsort ls = map snd . L.sort $ indexLs
+  where indexLs = map (\e -> (length e, e)) ls
+        
+-- b) objective is to sort the elements of this list according to their length
+-- frequency; i.e., in the default, where sorting is done ascendingly, lists
+-- with rare lengths are placed first, others with a more frequent length come
+-- later.
+
+lfsort :: Ord t => [[t]] -> [[t]]
+lfsort ls = map (\(f,e) -> e) . L.sort $ freqLs
+   where lenLs = map length ls
+         freqLookup = map (\(f,s) -> (s,f)) . encode . L.sort $ lenLs
+         freqLs = map (\e -> (lookup (length e) freqLookup,e)) $ ls

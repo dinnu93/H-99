@@ -275,3 +275,69 @@ goldbach n
 
 goldbachList :: Integer -> Integer -> [(Integer, Integer)]
 goldbachList x y = map goldbach . filter (\n -> even n && n > 2) $ [x..y]
+
+-- No problems with numbers 42 to 45
+
+-- 46) Define predicates and/2, or/2, nand/2, nor/2, xor/2, impl/2 and equ/2
+
+and2 :: Bool -> Bool -> Bool
+and2 = (&&)
+
+or2 :: Bool -> Bool -> Bool
+or2 = (||)
+
+nand2 :: Bool -> Bool -> Bool
+nand2 x y = not $ and2 x y
+
+nor2 :: Bool -> Bool -> Bool
+nor2 x y = not $ or2 x y
+
+equ2 :: Bool -> Bool -> Bool
+equ2  = (==)
+
+xor2 :: Bool -> Bool -> Bool
+xor2 x y = not $ equ2 x y
+
+impl2 :: Bool -> Bool -> Bool
+impl2 x y = or2 (not x) y
+
+-- create the truth table list.
+
+tableList :: (Bool -> Bool -> Bool) -> [[Bool]]
+tableList f = map (\[x,y] -> [x,y,f x y]) inputList 
+  where inputList = [[x,y] | x <- [True,False], y <- [True,False]]
+
+displayTable :: [[Bool]] -> String
+displayTable = unlines . map (\xs -> unwords . map show $ xs) 
+
+table :: (Bool -> Bool -> Bool) -> IO ()
+table = putStr . displayTable . tableList  
+
+-- 47) Continue problem P46 by defining and/2, or/2, etc as being operators.
+
+-- Not even a problem :P comes naturally with Haskell. every function can be used as an operator.
+
+-- 48) Generalize problem P46 in such a way that the logical expression may contain any number of logical variables.
+
+inputList :: Integer -> [[Bool]]
+inputList 1 = [[True],[False]]
+inputList n = [x ++ y | x <- inputList (n-1), y <- inputList 1]
+
+tableList' :: Integer -> ([Bool] -> Bool) -> [[Bool]]
+tableList' l f =  map (\ls -> ls ++ [f ls]) inList
+  where inList = inputList l 
+
+table' :: Integer -> ([Bool] -> Bool) -> IO ()
+table' l f = putStr $ displayTable $ tableList' l f  
+
+-- 49) An n-bit Gray code is a sequence of n-bit strings constructed according
+-- to certain rules. (Read up gray codes for the rules of construction)
+
+gray :: Integer -> [String]
+gray 1 = ["0","1"]
+gray n = map ('0':) succGray ++ map ('1':) refSuccGray
+  where succGray = gray (n-1)
+        reflect = reverse
+        refSuccGray = reflect succGray
+  
+-- 50) 

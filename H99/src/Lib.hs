@@ -82,9 +82,9 @@ pack ls = [headPack ls] ++ pack (tailPack ls)
 
 -- 10) Run-length encoding of a list
 
-encode :: Eq t => [t] -> [(Int,t)]
+encode :: Eq t => [t] -> [(Integer,t)]
 encode ls = zip pkdLen compList
-  where pkdLen = map length . pack $ ls
+  where pkdLen = map (toInteger . length) . pack $ ls
         compList = compress ls
 
 -- 11) Modified run-length encoding to give no length for non repetetive
@@ -321,8 +321,10 @@ table = putStr . displayTable . tableList
 
 inputList :: Integer -> [[Bool]]
 inputList 1 = [[True],[False]]
-inputList n = [x ++ y | x <- inputList (n-1), y <- inputList 1]
-
+inputList n
+  | n > 1 = [x ++ y | x <- inputList (n-1), y <- inputList 1]
+  | otherwise = error "Negative numbers not allowed!"
+    
 tableList' :: Integer -> ([Bool] -> Bool) -> [[Bool]]
 tableList' l f =  map (\ls -> ls ++ [f ls]) inList
   where inList = inputList l 
@@ -340,4 +342,51 @@ gray n = map ('0':) succGray ++ map ('1':) refSuccGray
         reflect = reverse
         refSuccGray = reflect succGray
   
--- 50) 
+-- 50) Huffman codes. given the map of char and frequency give the huffman code mapping for respective chars.
+
+type Frequency = Integer
+type Edge = String
+type Code = String
+data HFTree =  L {string :: String, frequency :: Frequency} |
+               N {string :: String,
+                  frequency ::  Frequency,
+                  lEdge :: Edge,
+                  lHFTree :: HFTree,
+                  rEdge :: Edge,
+                  rHFTree :: HFTree} deriving (Show)  
+
+addTrees :: HFTree -> HFTree -> HFTree
+addTrees l1@(L s1 f1) l2@(L s2 f2) = N (s1 ++ s2) (f1 + f2) "0" l1 "1" l2
+addTrees l@(L s1 f1) hft@(N s2 f2 _ _ _ _) = N (s1 ++ s2) (f1 + f2) "0" l "1" hft
+addTrees hft@(N s1 f1 _ _ _ _) l@(L s2 f2) = N (s1 ++ s2) (f1 + f2) "0" hft "1" l
+addTrees hft1@(N s1 f1 _ _ _ _) hft2@(N s2 f2 _ _ _ _) = N (s1 ++ s2) (f1 + f2) "0" hft1 "1" hft2
+
+foldTree :: [HFTree] -> HFTree
+foldTree hftList
+  | l == 1 = head hftList
+  | l > 1 = foldTree $ headHFTList ++ [addTrees (head tailHFTList) (last tailHFTList)]
+  | l < 1 = error "Can't make a Huffman Tree from an ampty list!"
+  where sortHFT = L.sortBy (\hf1 hf2 -> (frequency hf2) `compare` (frequency hf1)) hftList
+        l = length hftList
+        headHFTList = take (l-2) sortHFT 
+        tailHFTList = drop (l-2) sortHFT 
+        
+convertFreqMap :: [(Char,Integer)] -> [HFTree]
+convertFreqMap = map (\(l,f) -> L [l] f)
+
+makeHFTree :: [(Char,Integer)] -> HFTree
+makeHFTree = foldTree . convertFreqMap 
+
+letterCode :: Char -> HFTree -> Code
+letterCode c (L s _) = ""
+letterCode c hfTree@(N s _ l lTree r rTree )
+  | cTree && clTree = l ++ letterCode c lTree
+  | cTree && crTree = r ++ letterCode c rTree 
+  where cTree = c `elem` (string hfTree)
+        clTree = c `elem` (string lTree)
+        crTree = c `elem` (string rTree) 
+
+codeMap :: [(Char, Integer)] -> [(Char, Code)]
+codeMap ls = map (\(l,f) -> (l,letterCode l lsHFTree)) ls 
+  where lsHFTree = makeHFTree ls
+  

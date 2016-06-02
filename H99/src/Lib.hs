@@ -365,7 +365,7 @@ foldTree :: [HFTree] -> HFTree
 foldTree hftList
   | l == 1 = head hftList
   | l > 1 = foldTree $ headHFTList ++ [addTrees (head tailHFTList) (last tailHFTList)]
-  | l < 1 = error "Can't make a Huffman Tree from an ampty list!"
+  | l < 1 = error "Can't make a Huffman Tree from an empty list!"
   where sortHFT = L.sortBy (\hf1 hf2 -> (frequency hf2) `compare` (frequency hf1)) hftList
         l = length hftList
         headHFTList = take (l-2) sortHFT 
